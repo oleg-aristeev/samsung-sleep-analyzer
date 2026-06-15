@@ -1,0 +1,8 @@
+# Зависимости для облачного деплоя (Streamlit Community Cloud / Hugging Face Spaces).
+# Платформа ставит их через pip. Локально по-прежнему используйте uv (uv run …).
+# Строка "." ставит сам пакет samsung_sleep из этого репозитория — без неё
+# `import samsung_sleep` в streamlit_app.py не найдётся (пакет лежит в src/).
+streamlit>=1.30
+pandas>=2.0
+plotly>=5.20
+.
