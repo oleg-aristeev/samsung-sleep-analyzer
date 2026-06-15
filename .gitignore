@@ -1,0 +1,33 @@
+# --- Личные данные здоровья: НИКОГДА не коммитить ---
+# Экспорты Samsung Health и всё, что из них получено
+samsunghealth_*/
+samsunghealth_*.zip
+*.shealth.zip
+sleep_csv/
+output/
+*.dashboard.html
+sleep_dashboard.html
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.uv/
+# uv.lock КОММИТИТСЯ намеренно (воспроизводимая установка) — не игнорируем
+
+# --- Инструменты / IDE / ОС ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+
+# --- Streamlit ---
+.streamlit/secrets.toml

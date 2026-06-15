@@ -1,0 +1,36 @@
+[project]
+name = "samsung-sleep-tracker"
+version = "0.1.0"
+description = "Turn a Samsung Health export into tidy sleep CSVs, an interactive dashboard, and an LLM-ready context pack."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Oleg Aristeev", email = "aristeev2@gmail.com" }]
+keywords = ["samsung-health", "sleep", "galaxy-watch", "quantified-self", "streamlit", "wearables"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+    "pandas>=2.0",
+    "plotly>=5.20",
+    "streamlit>=1.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "kaleido>=0.2"]
+
+[project.scripts]
+samsung-sleep = "samsung_sleep.cli:main"
+
+[project.urls]
+# TODO: замените на адрес вашего репозитория после публикации
+Homepage = "https://github.com/olegaristeev/samsung-sleep-tracker"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/samsung_sleep"]
