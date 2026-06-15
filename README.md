@@ -1,127 +1,133 @@
+🇷🇺 Русский (этот файл) · [🇬🇧 English](README.en.md)
+
 # Samsung Sleep Tracker
 
-Turn a **Samsung Health** data export (Galaxy Watch + Samsung Health app) into:
+Превращает экспорт **Samsung Health** (Galaxy Watch + приложение Samsung Health) в:
 
-- 📄 **tidy CSV tables** about your sleep, ready for analysis or a spreadsheet;
-- 📊 an **interactive Streamlit dashboard** (tables + charts you can re-run on new exports);
-- 🤖 an **LLM-ready context pack** (`llm_context.md`) so you can ask any model a free-form
-  question about your sleep and get an answer that isn't fooled by the data's quirks.
+- 📄 аккуратные **CSV-таблицы** о сне — для анализа или таблиц;
+- 📊 интерактивный **дашборд Streamlit** (таблицы + графики, которые можно пересчитывать
+  на новых выгрузках);
+- 🤖 готовый **контекст для LLM** (`llm_context.md`), чтобы задать любой свободный вопрос
+  о сне и получить ответ, который не вводят в заблуждение особенности данных.
 
-The headline feature is **honest data quality**. A wrist tracker doesn't record sleep while
-it's on the charger — and a naive reading of the raw files mistakes "watch was off" for
-"person was awake for 40 hours." This tool detects those gaps (using heart-rate coverage),
-labels them explicitly, and ships those rules inside the LLM context so an AI doesn't
-hallucinate "sleepless marathons" that never happened.
+Главная фишка — **честное качество данных**. Наручный трекер не пишет сон, пока лежит на
+зарядке, и наивное чтение сырых файлов принимает «часы были сняты» за «человек не спал
+40 часов». Инструмент находит такие разрывы (по покрытию пульсом), помечает их явно и кладёт
+эти правила в контекст для LLM, чтобы модель не выдумывала «марафоны без сна», которых не было.
 
-> ⚠️ **Not medical advice.** A consumer wearable is not a diagnostic device. This is data
-> tooling, not a diagnosis.
+> ⚠️ **Не медицинский совет.** Потребительский гаджет — не диагностический прибор. Это
+> инструмент работы с данными, а не диагноз.
+
+## Приложение онлайн
+
+Развёрнуто бесплатно: **https://samsung-sleep-analyzer.streamlit.app** — просто откройте и
+загрузите свой `.zip`. На сервере ничего не сохраняется.
 
 ---
 
-## Install
+## Установка
 
-Uses [uv](https://docs.astral.sh/uv/). No manual venv needed — `uv run` syncs dependencies
-on first use.
+Используется [uv](https://docs.astral.sh/uv/). Отдельный venv не нужен — `uv run` подтянет
+зависимости при первом запуске.
 
 ```bash
-git clone <your-repo-url> samsung-sleep-tracker
+git clone <url-репозитория> samsung-sleep-tracker
 cd samsung-sleep-tracker
 ```
 
-## Get your data
+## Как выгрузить свои данные
 
-In the **Samsung Health** app: `Settings → Download personal data`. You'll receive a
-`samsunghealth_<user>_<id>.zip`. Point the tool at that `.zip` (or at the unzipped folder).
+В приложении **Samsung Health**: **Моя страница → ⋮ (три точки справа вверху) →
+Настройки → Загрузка личных данных**. Придёт архив `samsunghealth_<пользователь>_<id>.zip` —
+его и подавайте в приложение/CLI (или распакованную папку).
 
-## CLI — export to CSV
+## CLI — выгрузка в CSV
 
 ```bash
-uv run samsung-sleep path/to/samsunghealth_export.zip -o output --html
+uv run samsung-sleep путь/к/samsunghealth_export.zip -o output --html
 ```
 
-Writes into `output/`:
+Пишет в `output/`:
 
-| File | One row per | Use it for |
-|------|-------------|------------|
-| `sleep_sessions.csv` | sleep session | full detail: stages, scores, physiology, local times |
-| `nights.csv` | "sleep day" (noon-to-noon) | trends + fragmentation (sessions count, longest continuous session), no double-counting |
-| `daily_sleep.csv` | calendar day | "how much did I sleep on day X" + data-quality flag |
-| `data_gaps.csv` | recording gap (>18 h) | spotting "watch was off" vs real wakefulness |
-| `sleep_stages.csv` | hypnogram segment | per-night sleep architecture |
-| `daily_context.csv` | calendar day | steps / workouts / naps to correlate with sleep |
-| `watch_off_hours.csv` | hour with no data | driving the grey "watch off" band in the actogram |
-| `llm_context.md` | — | **attach this to your LLM prompt** (data dictionary + rules) |
+| Файл | Одна строка на | Зачем |
+|------|----------------|-------|
+| `sleep_sessions.csv` | сессию сна | полная детализация: стадии, оценки, физиология, локальное время |
+| `nights.csv` | «сутки сна» (полдень–полдень) | тренды + разрывность (число сессий, длиннейшая непрерывная сессия), без задвоений |
+| `daily_sleep.csv` | календарный день | «сколько я спал в день X» + флаг качества данных |
+| `data_gaps.csv` | разрыв записи (>18 ч) | отличить «часы сняты» от реального бодрствования |
+| `sleep_stages.csv` | сегмент гипнограммы | архитектура сна по ночам |
+| `daily_context.csv` | календарный день | шаги / тренировки / дневной сон для корреляций со сном |
+| `watch_off_hours.csv` | час без данных | серая зона «часы сняты» на актограмме |
+| `llm_context.md` | — | **прикладывайте к запросу в LLM** (словарь данных + правила) |
 
-`--html` additionally builds `output/sleep_dashboard.html` (open in any browser).
+`--html` дополнительно собирает `output/sleep_dashboard.html` (открыть в браузере).
 
-Useful flags: `--rolling-days N`, `--sleep-day-boundary HOUR`, `--gap-min-hours H`.
+Полезные флаги: `--rolling-days N`, `--sleep-day-boundary HOUR`, `--gap-min-hours H`.
 
-## Streamlit — interactive dashboard
+## Streamlit — интерактивный дашборд
 
 ```bash
 uv run streamlit run streamlit_app.py
 ```
 
-Upload your `.zip` (or paste a local path), then explore tabs: **Overview** (key metrics
-incl. sleep fragmentation), **Charts** (clean sleep map, stage actogram, sleep trend,
-fragmentation, score, architecture, physiology, sleep-onset histogram), **Statistics**
-(summary table, day→night correlations, a correlation heatmap, and a build-your-own
-scatter), **Tables** (sortable, downloadable), **Data quality** (the gaps and why they
-matter), and **LLM export** (preview + download the context pack and all CSVs).
+Загрузите `.zip` (или вставьте локальный путь) и листайте вкладки: **Обзор** (ключевые
+метрики, включая разрывность сна), **Графики** (карта сна, актограмма по фазам, тренд сна,
+разрывность, оценка, архитектура, физиология, гистограмма времени засыпания), **Статистика**
+(сводная таблица, корреляции день→ночь, тепловая карта, свой scatter), **Таблицы**
+(сортируемые, выгружаемые), **Качество данных** (разрывы и почему они важны), **Для LLM**
+(превью и скачивание контекста и всех CSV).
 
-Tune the processing with the sidebar sliders (sleep-day boundary, gap threshold, wear
-thresholds, rolling window) — each one has an inline `?` explaining what it changes — then
-hit **Применить / Apply** to recompute.
+Параметры обработки крутятся слайдерами в сайдбаре (граница «суток сна», порог разрыва,
+пороги ношения, окно скользящего среднего) — у каждого есть подсказка `?`, что он меняет —
+затем жмёте **Применить**.
 
-> **Fragmentation** is read straight from Samsung's own sessions, not reinvented from the
-> hypnogram. `sessions_count` is how many separate sleep sessions the watch recorded that
-> sleep-day (each one = you woke and fell back asleep), and `longest_block_min` is the
-> longest single continuous session. The `awake` segments inside a session are Samsung's
-> micro-arousals and are kept as detail only.
+> **Разрывность** берётся прямо из сессий Samsung, а не выдумывается из гипнограммы.
+> `sessions_count` — сколько отдельных сессий сна записали часы за эти сутки (каждая = ты
+> проснулся и снова заснул), `longest_block_min` — длительность самой длинной непрерывной
+> сессии. `awake`-сегменты внутри сессии — это микропробуждения Samsung, они остаются
+> только как деталь.
 
-## Use with an LLM
+## Использование с LLM
 
-Attach `llm_context.md` plus the CSVs you care about (usually `nights.csv` +
-`daily_context.csv`, add `sleep_sessions.csv` for detail) and ask anything:
-*"How did my sleep change over the period?"*, *"Does exercise correlate with deep sleep?"*,
-*"Which nights look physiologically off?"* The context file tells the model what every
-column means and which traps to avoid.
+Приложите `llm_context.md` и нужные CSV (обычно `nights.csv` + `daily_context.csv`, добавьте
+`sleep_sessions.csv` для детализации) и спросите что угодно: *«Как менялся мой сон за
+период?»*, *«Связаны ли тренировки с глубоким сном?»*, *«Какие ночи выглядят физиологически
+необычно?»* Контекст объясняет модели, что значит каждая колонка и каких ловушек избегать.
 
-## Library API
+## Библиотечный API
 
 ```python
 from samsung_sleep import Export, build_all, write_all, write_html
 
-with Export("export.zip") as ex:      # also accepts a folder path or a file-like zip
-    data = build_all(ex)              # -> SleepData (all tables as list[dict])
+with Export("export.zip") as ex:      # принимает также путь к папке или file-like zip
+    data = build_all(ex)              # -> SleepData (все таблицы как list[dict])
 
-write_all(data, "output")             # CSVs + llm_context.md
-write_html(data, "output/dash.html")  # standalone dashboard
+write_all(data, "output")             # CSV + llm_context.md
+write_html(data, "output/dash.html")  # автономный дашборд
 ```
 
-## How it works
+## Как устроено
 
 ```
-loader.py     read tables/JSON from a .zip or folder (handles the metadata header, BOM)
-timeutils.py  UTC → local conversion (the offset lives in a separate column)
-vitals.py     heart rate, HRV, breathing, SpO2, skin temperature per time window
-transform.py  build_all() → sessions, nights, daily sleep, gaps, stages, context
-              (fragmentation = Samsung's own session count + longest continuous session)
-stats.py      summary statistics + day→night Pearson correlations (pure Python)
-export.py     CSV writer + llm_context.md generator (now ships stats + correlations)
-charts.py     plotly figures (shared by the CLI HTML export and Streamlit)
-cli.py        the `samsung-sleep` command
+loader.py     чтение таблиц/JSON из .zip или папки (метаданные-заголовок, BOM)
+timeutils.py  UTC → локальное время (смещение лежит в отдельной колонке)
+vitals.py     пульс, HRV, дыхание, SpO2, температура кожи по окну времени
+transform.py  build_all() → сессии, сутки сна, сон по дням, разрывы, стадии, контекст
+              (разрывность = число сессий Samsung + длиннейшая непрерывная сессия)
+stats.py      сводные статистики + корреляции день→ночь по Пирсону (чистый Python)
+export.py     запись CSV + генератор llm_context.md (со статистикой и корреляциями)
+charts.py     графики plotly (общие для HTML-экспорта CLI и Streamlit)
+cli.py        команда samsung-sleep
 ```
 
-Processing knobs live in [`config.py`](src/samsung_sleep/config.py) (`Config`).
-The reverse-engineered format of the raw export is documented in
-[`docs/DATA_GUIDE.md`](docs/DATA_GUIDE.md).
+Параметры обработки — в [`config.py`](src/samsung_sleep/config.py) (`Config`).
+Реконструированный формат сырого экспорта описан в [`docs/DATA_GUIDE.md`](docs/DATA_GUIDE.md).
 
-## Privacy
+## Приватность
 
-Your health export is personal data. The `.gitignore` keeps exports and all generated
-output out of git by default — keep it that way before pushing anywhere public.
+Ваш экспорт здоровья — персональные данные. `.gitignore` по умолчанию держит выгрузки и
+весь сгенерированный вывод вне git — не меняйте это перед публикацией куда-либо.
 
-## License
+## Лицензия
 
-MIT — see [LICENSE](LICENSE).
+MIT — см. [LICENSE](LICENSE).
